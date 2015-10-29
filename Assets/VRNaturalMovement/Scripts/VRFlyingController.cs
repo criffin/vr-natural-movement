@@ -1,59 +1,55 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.IO;
+using VR = UnityEngine.VR;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(AudioSource))]
 public class VRFlyingController : MonoBehaviour 
 {
 	[SerializeField] float desiredSpeed = 5;
-	public float speed;
-
-	[SerializeField] Transform centerEyeAnchor;
+	float speed;
 	
 	Quaternion? baseRot;
 	new Rigidbody rigidbody;
-	AudioSource audioWind;
-	AudioSource[] audioCoins;
-	int activeCoinSource;
-	Transform camPoint;
+	new Transform camera;
 
 	void Start()
 	{
 		rigidbody = GetComponent<Rigidbody>();
-		var sources = GetComponents<AudioSource>();
-		audioWind = sources[0];
-		audioCoins = new AudioSource[2];
-		audioCoins[0] = sources[1];
-		audioCoins[1] = sources[2];		
-		camPoint = transform.GetChild(0);
-		camPoint.parent = transform.parent;
+		camera = GetComponentInChildren<Camera>().transform;
+		Recenter();
 	}
 
 	void Update()
-	{
-		if (Input.GetKeyDown(KeyCode.Space))
-			baseRot = centerEyeAnchor.localRotation;
-
-		if (Input.GetKeyDown(KeyCode.Escape)) Application.LoadLevel("Atmospherics");
-
-		if (baseRot != null) {
-			Quaternion relative = Quaternion.Inverse(baseRot.Value) * centerEyeAnchor.localRotation;
-			camPoint.localRotation *= Quaternion.Lerp(Quaternion.identity, relative, Time.deltaTime);
-
-			speed = Mathf.Lerp(speed, desiredSpeed, Time.deltaTime * 0.2f);
-			rigidbody.velocity = Vector3.Lerp(rigidbody.velocity, centerEyeAnchor.forward * speed, Time.deltaTime * 5);
-			camPoint.position = Vector3.Lerp(camPoint.position, transform.position, Time.deltaTime * 10);
-			audioWind.pitch = Mathf.Clamp(speed / 45 + 0.5f, 0.5f, 2);
-			audioCoins[activeCoinSource].pitch = Mathf.Clamp(speed / 50 + 0.5f, 0.5f, 2) * 0.5f;
-			audioCoins[activeCoinSource].volume = (1 - Mathf.Clamp01(speed / 60)) * 0.5f + 0.04f;
-		}
+	{		
+		UpdateKeyboard();
+		UpdateMovement();
 	}
 
-	public void CoinGrab()
+	void UpdateMovement()
 	{
-		activeCoinSource = (activeCoinSource + 1) % audioCoins.Length;
-		audioCoins[activeCoinSource].Play();
+		Quaternion relative = Quaternion.Inverse(baseRot.Value) * camera.localRotation;
+		transform.localRotation *= Quaternion.Lerp(Quaternion.identity, relative, Time.deltaTime);
+
+		speed = Mathf.Lerp(speed, desiredSpeed, Time.deltaTime * 0.2f);
+		rigidbody.velocity = Vector3.Lerp(rigidbody.velocity, camera.forward * speed, Time.deltaTime * 5);
+		transform.position = Vector3.Lerp(transform.position, transform.position, Time.deltaTime * 10);	
+	}
+
+	void UpdateKeyboard()
+	{
+		if (Input.GetKeyDown(KeyCode.Space)) Recenter();
+		if (Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
+#if UNITY_EDITOR
+	    // for debugging
+		transform.RotateAround(transform.position, Vector3.up, Input.GetAxis("Mouse X") * 50 * Time.deltaTime);
+		transform.Rotate(Vector3.right * -Input.GetAxis("Mouse Y") * 50 * Time.deltaTime);
+#endif
+	}
+
+	void Recenter()
+	{
+		VR.InputTracking.Recenter();
+		baseRot = camera.localRotation;
 	}
 
 	void OnCollisionEnter(Collision collision) 
