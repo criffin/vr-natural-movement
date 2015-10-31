@@ -14,15 +14,16 @@ This project is based on [Oculus Natural Movement](https://github.com/taphos/ocu
 
 ### Flying
 
-VR device head turn angle is used as a camera rotation velocity. This allows player to turn any direction with only a few degrees of head turn. It gives natural feeling of motion and reduces motion sickness as camera is rotated together with players head. Be careful to to use large acceleration when changing flying speed as it contributes to motion sickness.
+VR device head turn angle is used as a camera rotation velocity. This allows player to turn any direction with only a few degrees of head turn, gives natural feeling of motion and reduces motion sickness as camera is rotated together with players head. Be careful to to use large acceleration when changing flying speed as it contributes to motion sickness.
 See example in scene [FlyingExample](blob/master/Assets/VRNaturalMovement/Scenes/FlyingExample.unity)
 
 ### Hand movement
 
 Mobile device accelerometer is used to track the hand position. Accelerometer data together with screen taps are sent from mobile device to PC using local WiFi connection. This is a kind of game remote control optimized to be used with one hand. Use it to control gun, sword or a robot hand movement.
 
- * Compile and run scene [GyroControllerDevice](blob/master/Assets/GyroController/Scenes/GyroControllerDevice.unity) for your mobile device platform
  * Compile and run scene [GyroController](blob/master/Assets/GyroController/Scenes/GyroControllerDevice.unity) for PC
+ * Disable virtual reality support in player settings->other
+ * Compile and run scene [GyroControllerDevice](blob/master/Assets/GyroController/Scenes/GyroControllerDevice.unity) for your mobile device platform 
  * Create an Ad-Hoc WiFi hotspot and connect devices (Usually works better then WiFi router)
  * Enter PCs local ip address in the text field of mobile device
  * Hand controlled gun should appear on PC screen
