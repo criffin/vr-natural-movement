@@ -5,9 +5,9 @@ public class AccelerometerInput : NetworkBehaviour
 {	
 	[SerializeField] GameObject bulletPrefab;
 
-	Quaternion baseRot = Quaternion.Euler(new Vector3(90,180,0));
-	Quaternion rotFix = new Quaternion(0,0,1,0) * Quaternion.Euler(new Vector3(-90,0,0));
-	Quaternion rot;
+	Quaternion baseRot = Quaternion.Euler(90, 180, 0);
+	Quaternion attitude;
+	Quaternion initialAttitude = Quaternion.Euler(0, 0, 180);
 
 	void Start()
 	{
@@ -29,19 +29,21 @@ public class AccelerometerInput : NetworkBehaviour
 	[ClientCallback]
 	void FixedUpdate()
 	{		
-		if (Input.touchCount > 0) CmdFire();
+		for (int i = 0; i < Input.touchCount; i++)
+			if (Input.GetTouch(i).phase == TouchPhase.Began)
+				CmdFire();
 		CmdRotate(Input.gyro.attitude);
 	}
 
 	[ServerCallback]
 	void Update()
-	{
-		if (Input.GetKeyDown(KeyCode.Space)) {			
-			baseRot = Quaternion.Inverse(Quaternion.Inverse(baseRot) * transform.localRotation);
+	{		
+		if (Input.GetKeyDown(KeyCode.Space)) {
+			initialAttitude = attitude;
 			UnityEngine.VR.InputTracking.Recenter();
 		}
 		if (Input.GetKeyDown(KeyCode.F)) Fire();
-		transform.localRotation = Quaternion.Slerp(transform.localRotation, rot, Time.deltaTime * 30f);
+		transform.localRotation = baseRot * Quaternion.Inverse(initialAttitude) * attitude;
 	}
 
 	[Command]
@@ -53,14 +55,14 @@ public class AccelerometerInput : NetworkBehaviour
 	[ServerCallback]
 	void Fire()
 	{
-		var bullet = Instantiate (bulletPrefab);
-		bullet.GetComponent<Rigidbody>().velocity = transform.forward * 10f;
+		var bullet = Instantiate(bulletPrefab);
+		bullet.GetComponent<Rigidbody>().velocity = -transform.up * 10f;
 	}
 
 	[Command]
 	[ServerCallback]
 	void CmdRotate(Quaternion attitude)
-	{
-		rot = baseRot * attitude * rotFix;
+	{		
+		this.attitude = attitude;
 	}		
 }
