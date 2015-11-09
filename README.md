@@ -2,6 +2,8 @@
 
 Collection of movement algorithms to be used in VR apps implemented using Unity3D.
 
+[![Alt Demo video](https://i.vimeocdn.com/video/542467007_640.webp)](https://vimeo.com/144592305)
+
 Mouse + keyboard or even gamepad dont work well when it comes to movement in virtual reality environments. This task requires another kind of hardware. While new hardware is not yet available we would like to encourage developers to use maximum of existing VR devices and other available gadgets in order to create better immersive experiences.
 You may call it a hack because some of the provided algorithms use hardware not the way it was intended.
 
