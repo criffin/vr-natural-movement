@@ -1,0 +1,53 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+[RequireComponent (typeof(CharacterMotor))]
+[AddComponentMenu ("Character/FPS Input Controller")]
+
+
+public class FPSInputController : MonoBehaviour
+{
+
+	private CharacterMotor motor;
+	private double lastupdate = 0.0f;
+	public float timeThreshold = 170.0f;
+	public float stepThreshold = 1.1f;
+	public float shakeThreshold = 0.4f;
+
+	// Use this for initialization
+	void Awake ()
+	{
+		motor = GetComponent<CharacterMotor> ();
+	}
+
+	void Update ()
+	{
+		Vector3 directionVector;
+		float dirx = Input.acceleration.x;
+		float diry = Input.acceleration.y;
+		float dirz = Input.acceleration.z;
+		double curTime = Time.time * 1000.0;
+		if ((curTime - lastupdate) > timeThreshold) {
+			if ((diry > stepThreshold || diry < -stepThreshold)
+			           && (dirx < shakeThreshold && dirx > -shakeThreshold)
+			           && (dirz < shakeThreshold && dirz > -shakeThreshold)) {
+				var difftime = (curTime - lastupdate);
+				lastupdate = curTime;
+				Debug.Log ("Made it into take a step");
+				directionVector = transform.forward;
+				directionVector.y = 0;
+				directionVector = new Vector3 (0, 0, 1);
+				if (directionVector != Vector3.zero) {
+					float directionLength = directionVector.magnitude;
+					directionVector = directionVector / directionLength;
+					directionLength = Mathf.Min (1.0f, directionLength);
+					directionLength = directionLength * directionLength;
+					directionVector = directionVector * directionLength;
+				}
+				motor.inputMoveDirection = transform.rotation * directionVector;
+			}
+		}
+	}
+
+}
